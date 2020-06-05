@@ -41,10 +41,10 @@ workflows:
     build-and-test:
       jobs:
         - build:
-            filters:
-              branches:
-                only:
-                  - master
+          filters:
+            branches:
+              only:
+                - master
         - test_server:
             filters:
               branches:
