@@ -3,6 +3,7 @@ orbs:
   node: circleci/node@2.1.0
 jobs:
   build-and-test:
+  build:
     executor:
       name: node/default
     steps:
@@ -39,10 +40,10 @@ jobs:
 workflows:
     build-and-test:
       jobs:
-        - build-and-test
+        - build
         - test_server:
-            reuqires:
+            requires:
                 - build
         - test_client:
-            reuqires:
+            requires:
                 - build        
