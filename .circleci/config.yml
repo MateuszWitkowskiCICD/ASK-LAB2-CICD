@@ -9,9 +9,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run:
-         name: Build docker containers
-         command: docker-compose up -d
+
       
   test_server:
     executor:
@@ -27,7 +25,7 @@ jobs:
           name: Running server tests
           command: npm test
           working_directory: ./server
-          
+                    
   test_client:
     executor:
       name: node/default
@@ -40,6 +38,27 @@ jobs:
           name: Running server tests
           command: npm test
           working_directory: ./client
+          
+  create_docker_images:
+    machine: true
+    steps:
+      - checkout          
+      - run:
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "matwitkowski" --password-stdin
+            sudo docker build ./db -t matwitkowski/database_image
+            sudo docker push matwitkowski/database_image:latest
+      - run:
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "matwitkowski" --password-stdin
+            sudo docker build ./server -t matwitkowski/server_image
+            sudo docker push matwitkowski/server_image
+      - run:
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "matwitkowski" --password-stdin
+            sudo docker build ./client -t matwitkowski/client_image
+            sudo docker push matwitkowski/client_image
+
           
 workflows:
     build-and-test:
@@ -62,4 +81,9 @@ workflows:
                 only:
                   - master
             requires:
-                - build        
+                - build
+                
+        - create_docker_images:
+            requires:
+              - test_server
+              - test_client
